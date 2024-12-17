@@ -10,11 +10,10 @@ resource "null_resource" "web_deployer" {
   provisioner "local-exec" {
     command = <<-EOT
       mkdir -p release_contents
-      cp ${path.module}/files/get_release.sh ./get_release.sh
-      chmod +x get_release.sh
-      SCRIPT_PATH="$(pwd)/get_release.sh"
+      cp ${path.module}/files/get_release.sh "${path.module}/get_release.sh"
+      chmod +x "${path.module}/get_release.sh"
       cd release_contents
-      $SCRIPT_PATH ${var.owner} ${var.repo} ${var.release_version} ${var.asset_name}
+      "${path.module}/get_release.sh" ${var.owner} ${var.repo} ${var.release_version} ${var.asset_name}
     EOT
   }
 
