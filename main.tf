@@ -1,3 +1,7 @@
+resource "terraform_data" "version" {
+  input = var.release_version
+}
+
 resource "null_resource" "web_deployer" {
   triggers = {
     version = terraform_data.version.output
