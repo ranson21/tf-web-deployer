@@ -1,16 +1,29 @@
+resource "terraform_data" "version" {
+  input = var.release_version
+}
+
 resource "null_resource" "web_deployer" {
-  # Clone down the released version of the web assets
-  provisioner "local-exec" {
-    command = "./get_release.sh ${var.owner} ${var.repo} ${var.release_version} ${var.asset_name}"
+  triggers = {
+    # Use the output from terraform_data to track changes
+    version = terraform_data.version.output
   }
 
-  # Copy the release into the GCS bucket
   provisioner "local-exec" {
-    command = "gsutil -m rsync -r -c -d ./${var.asset_dir} gs://${var.bucket_name}"
+    command = <<-EOT
+      mkdir -p release_contents
+      chmod +x get_release.sh
+      SCRIPT_PATH="$(pwd)/get_release.sh"
+      cd release_contents
+      $SCRIPT_PATH ${var.owner} ${var.repo} ${var.release_version} ${var.asset_name}
+    EOT
   }
 
-  # Cleanup step
   provisioner "local-exec" {
-    command = "rm -rf ./${var.asset_dir}"
+    command = "gsutil -m rsync -r -c -d release_contents/ gs://${var.bucket_name}"
+  }
+
+  provisioner "local-exec" {
+    command = "rm -rf release_contents"
+    when    = destroy
   }
 }

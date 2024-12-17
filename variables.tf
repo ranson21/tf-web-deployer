@@ -1,31 +1,31 @@
-variable "bucket_name" {
-  description = "Storage bucket where the assets will be deployed"
-  type        = string
-}
-
-variable "release_version" {
-  description = "Version of the assets to deploy"
-  type        = string
-}
-
+# variables.tf
 variable "owner" {
-  description = "Repository owner"
+  description = "GitHub repository owner"
   type        = string
 }
 
 variable "repo" {
-  description = "Repository name"
+  description = "GitHub repository name"
+  type        = string
+}
+
+variable "release_version" {
+  description = "Release version/tag to deploy"
   type        = string
 }
 
 variable "asset_name" {
-  description = "Name of the release version asset"
+  description = "Name of the asset to download from the release"
   type        = string
-  default     = "release.zip"
 }
 
-variable "asset_dir" {
-  description = "Directory where the assets are located"
+variable "bucket_name" {
+  description = "Name of the GCS bucket to deploy to"
   type        = string
-  default     = "build"
+}
+
+variable "triggers" {
+  description = "Map of triggers to force deployment updates"
+  type        = map(string)
+  default     = {}
 }
