@@ -1,11 +1,11 @@
-#!/bin/bash
+#!/bin/sh
 
 # Check dependencies.
 set -e
 type curl grep sed tr >&2
 
 # Validate settings.
-[ -f ~/.secrets ] && source ~/.secrets
+[ -f ~/.secrets ] && . ~/.secrets
 [ "$GITHUB_TOKEN" ] || {
   echo "Error: Please define GITHUB_TOKEN variable." >&2
   exit 1
@@ -15,7 +15,12 @@ type curl grep sed tr >&2
   exit 1
 }
 [ "$TRACE" ] && set -x
-read owner repo tag name <<<$@
+
+# Set arguments to variables (sh-compatible)
+owner=$1
+repo=$2
+tag=$3
+name=$4
 
 # Clean up any existing files
 rm -f "$name"
@@ -50,16 +55,21 @@ curl $CURL_ARGS "$name" -H "Authorization: token $GITHUB_TOKEN" -H 'Accept: appl
 echo "$0 done." >&2
 
 # Extract the tar archive
-if [[ "$name" == *.tar.gz ]] || [[ "$name" == *.tgz ]]; then
+case "$name" in
+  *.tar.gz|*.tgz)
     tar xzf "$name"
-elif [[ "$name" == *.tar ]]; then
+    ;;
+  *.tar)
     tar xf "$name"
-elif [[ "$name" == *.tar.bz2 ]]; then
+    ;;
+  *.tar.bz2)
     tar xjf "$name"
-else
+    ;;
+  *)
     echo "Error: Unsupported archive format for $name" >&2
     exit 1
-fi
+    ;;
+esac
 
 # Cleanup the archive
 rm -f "$name"
