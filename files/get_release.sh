@@ -5,7 +5,6 @@ set -e
 type curl grep sed tr >&2
 
 # Validate settings.
-[ -f ~/.secrets ] && . ~/.secrets
 [ "$GITHUB_TOKEN" ] || {
   echo "Error: Please define GITHUB_TOKEN variable." >&2
   exit 1
@@ -24,6 +23,10 @@ name=$4
 
 # Clean up any existing files
 rm -f "$name"
+rm -rf release_contents
+
+# Create the release_contents directory
+mkdir -p release_contents
 
 # Define variables.
 GH_API="https://api.github.com"
@@ -54,16 +57,16 @@ echo "Downloading asset..." >&2
 curl $CURL_ARGS "$name" -H "Authorization: token $GITHUB_TOKEN" -H 'Accept: application/octet-stream' "$GH_ASSET"
 echo "$0 done." >&2
 
-# Extract the tar archive
+# Extract the tar archive into release_contents
 case "$name" in
   *.tar.gz|*.tgz)
-    tar xzf "$name"
+    tar xzf "$name" -C release_contents --strip-components=1
     ;;
   *.tar)
-    tar xf "$name"
+    tar xf "$name" -C release_contents --strip-components=1
     ;;
   *.tar.bz2)
-    tar xjf "$name"
+    tar xjf "$name" -C release_contents --strip-components=1
     ;;
   *)
     echo "Error: Unsupported archive format for $name" >&2
@@ -73,3 +76,6 @@ esac
 
 # Cleanup the archive
 rm -f "$name"
+
+# Verify the directory exists and has content
+ls -la release_contents/ || exit 1
