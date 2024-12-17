@@ -8,30 +8,24 @@ resource "null_resource" "web_deployer" {
   }
 
   provisioner "local-exec" {
-    command = <<-EOT
+    command     = <<-EOT
       pwd
-      ls -la
-      echo "Creating release_contents directory..."
-      mkdir -p release_contents
-      
-      echo "Current directory contents:"
-      ls -la
-      
       echo "Files directory contents:"
-      ls -la ./files || echo "Files directory not found"
-      
-      echo "Module path contents:"
-      ls -la ${path.module}
+      ls -la ./files/
       
       echo "Copying script..."
-      cp ${path.module}/files/get_release.sh ./get_release.sh || echo "Copy failed"
+      cp ./files/get_release.sh ./get_release.sh || { echo "Copy failed with status $?"; ls -la ./files/get_release.sh; exit 1; }
+      
+      echo "Verifying copy:"
+      ls -la ./get_release.sh || echo "Script not found after copy"
       
       echo "Making script executable..."
-      chmod +x ./get_release.sh || echo "Chmod failed"
+      chmod +x ./get_release.sh || { echo "Chmod failed with status $?"; exit 1; }
       
-      echo "Running script..."
-      ./get_release.sh ${var.owner} ${var.repo} ${var.release_version} ${var.asset_name}
+      echo "Running script with bash..."
+      bash -x ./get_release.sh ${var.owner} ${var.repo} ${var.release_version} ${var.asset_name} || { echo "Script execution failed with status $?"; exit 1; }
     EOT
+    interpreter = ["/bin/bash", "-c"]
   }
 
   provisioner "local-exec" {
