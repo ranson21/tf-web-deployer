@@ -4,13 +4,13 @@ resource "terraform_data" "version" {
 
 resource "null_resource" "web_deployer" {
   triggers = {
-    # Use the output from terraform_data to track changes
     version = terraform_data.version.output
   }
 
   provisioner "local-exec" {
     command = <<-EOT
       mkdir -p release_contents
+      cp ${path.module}/files/get_release.sh ./get_release.sh
       chmod +x get_release.sh
       SCRIPT_PATH="$(pwd)/get_release.sh"
       cd release_contents
