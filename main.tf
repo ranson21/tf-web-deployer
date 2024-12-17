@@ -20,7 +20,6 @@ resource "null_resource" "web_deployer" {
 
   provisioner "local-exec" {
     command     = <<-EOT
-      set -x  # Enable command tracing
       echo "Copying script..."
       cp ./files/get_release.sh ./get_release.sh || { echo "Copy failed with status $?"; ls -la ./files/get_release.sh; exit 1; }
       
