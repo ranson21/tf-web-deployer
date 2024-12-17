@@ -29,3 +29,15 @@ variable "triggers" {
   type        = map(string)
   default     = {}
 }
+
+variable "github_token" {
+  description = "GitHub token for repository access"
+  type        = string
+  sensitive   = true
+  default     = null # This allows the variable to be optional
+
+  validation {
+    condition     = var.github_token != ""
+    error_message = "GitHub token cannot be empty if provided."
+  }
+}
