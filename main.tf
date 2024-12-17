@@ -28,12 +28,11 @@ resource "null_resource" "web_deployer" {
       chmod +x ./get_release.sh || { echo "Chmod failed with status $?"; exit 1; }
       
       echo "Running script..."
-      export GITHUB_TOKEN="$${GITHUB_TOKEN}"
       sh -x ./get_release.sh ${var.owner} ${var.repo} ${var.release_version} ${var.asset_name} || { echo "Script execution failed with status $?"; exit 1; }
     EOT
     interpreter = ["/bin/sh", "-c"]
     environment = {
-      GITHUB_TOKEN = "oauth2:${local.github_token}"
+      GITHUB_TOKEN = var.github_token # Remove the oauth2: prefix
     }
   }
 
