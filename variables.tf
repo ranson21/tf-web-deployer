@@ -40,3 +40,12 @@ variable "github_token" {
     error_message = "GitHub token cannot be empty."
   }
 }
+
+variable "host" {
+  description = "Deployment host type (gcs or firebase)"
+  type        = string
+  validation {
+    condition     = contains(["gcs", "firebase"], var.host)
+    error_message = "Host must be either 'gcs' or 'firebase'."
+  }
+}
